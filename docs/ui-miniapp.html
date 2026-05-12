@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>互帮互助小程序 — UI 设计稿</title>
+<style>
+/* ===== Design Tokens ===== */
+:root {
+  --color-primary: #059669;
+  --color-primary-light: #10B981;
+  --color-primary-bg: #ECFDF5;
+  --color-primary-border: #A7F3D0;
+  --color-accent: #EA580C;
+  --color-accent-light: #F97316;
+  --color-accent-bg: #FFF7ED;
+  --color-bg: #F8FAFC;
+  --color-card: #FFFFFF;
+  --color-text: #0F172A;
+  --color-text-secondary: #64748B;
+  --color-text-tertiary: #94A3B8;
+  --color-border: #E2E8F0;
+  --color-border-light: #F1F5F9;
+  --color-success: #059669;
+  --color-success-bg: #D1FAE5;
+  --color-warning: #D97706;
+  --color-warning-bg: #FEF3C7;
+  --color-danger: #DC2626;
+  --color-danger-bg: #FEE2E2;
+  --color-info: #2563EB;
+  --color-info-bg: #DBEAFE;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-elevated: 0 4px 16px rgba(0,0,0,0.08);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --touch-target: 44px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  background: #E2E8F0;
+  display: flex; flex-wrap: wrap; gap: 40px; padding: 40px; justify-content: center; align-items: flex-start;
+}
+.page-group { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.page-label {
+  font-size: 13px; font-weight: 600; color: var(--color-text); letter-spacing: 0.3px;
+  background: var(--color-card); padding: 6px 14px; border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+}
+.phone-frame {
+  width: 375px; background: var(--color-bg); border-radius: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 2px #1E293B, 0 0 0 6px #CBD5E1;
+  overflow: hidden; position: relative;
+}
+
+/* Status bar */
+.status-bar {
+  height: 44px; background: var(--color-card); display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; font-size: 12px; font-weight: 600; color: var(--color-text);
+}
+.status-bar .icons { font-size: 11px; color: var(--color-text-secondary); }
+
+/* Nav bar */
+.nav-bar {
+  height: var(--touch-target); background: var(--color-card); display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 600; color: var(--color-text); position: relative;
+  border-bottom: 1px solid var(--color-border-light);
+}
+.nav-bar .back {
+  position: absolute; left: 12px; color: var(--color-primary); font-size: 15px; font-weight: 400; cursor: pointer;
+  min-width: var(--touch-target); min-height: var(--touch-target); display: flex; align-items: center;
+}
+.nav-bar .action {
+  position: absolute; right: 12px; color: var(--color-primary); font-size: 15px; font-weight: 500; cursor: pointer;
+  min-width: var(--touch-target); min-height: var(--touch-target); display: flex; align-items: center; justify-content: flex-end;
+}
+.content { padding: var(--space-4); overflow-y: auto; max-height: 580px; }
+
+/* Tab bar */
+.bottom-bar {
+  height: 56px; background: var(--color-card); border-top: 1px solid var(--color-border);
+  display: flex; align-items: center; padding-bottom: 4px;
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 10px; color: var(--color-text-tertiary); cursor: pointer; padding: 4px 0;
+}
+.tab-item.active { color: var(--color-primary); }
+.tab-icon { font-size: 22px; line-height: 1; }
+.tab-item.add-btn { flex: 1.2; }
+.tab-item .add-circle {
+  width: var(--touch-target); height: var(--touch-target); border-radius: 50%;
+  background: var(--color-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+  margin-top: -12px; box-shadow: 0 2px 8px rgba(5,150,105,0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.tab-item .add-circle:active { transform: scale(0.92); box-shadow: 0 1px 4px rgba(5,150,105,0.3); }
+
+/* Search */
+.search-bar {
+  background: #F1F5F9; border-radius: var(--radius-md); padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px; color: var(--color-text-tertiary);
+  font-size: 15px; margin-bottom: var(--space-3); cursor: pointer;
+  transition: background 0.15s ease;
+}
+.search-bar:active { background: #E2E8F0; }
+
+/* Type tabs */
+.type-tabs { display: flex; gap: 0; margin-bottom: var(--space-3); background: #F1F5F9; border-radius: var(--radius-md); padding: 3px; }
+.type-tab {
+  flex: 1; text-align: center; padding: 7px 0; font-size: 14px; border-radius: 7px;
+  cursor: pointer; color: var(--color-text-secondary); transition: all 0.15s ease;
+  min-height: 36px; display: flex; align-items: center; justify-content: center;
+}
+.type-tab.active { background: var(--color-card); color: var(--color-primary); font-weight: 600; box-shadow: var(--shadow-card); }
+.type-tab:active { background: var(--color-card); }
+
+/* Filter chips */
+.filter-row { display: flex; gap: var(--space-2); margin-bottom: var(--space-3); font-size: 13px; }
+.filter-chip {
+  padding: 7px 10px; border-radius: var(--radius-sm); background: var(--color-card); color: var(--color-text-secondary);
+  border: 1px solid var(--color-border); display: flex; align-items: center; gap: 4px; cursor: pointer;
+  transition: background 0.15s ease; min-height: 34px;
+}
+.filter-chip:active { background: #F1F5F9; }
+
+/* Task card */
+.task-card {
+  background: var(--color-card); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-3);
+  box-shadow: var(--shadow-card); cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: 1px solid var(--color-border-light);
+}
+.task-card:active { transform: scale(0.985); box-shadow: var(--shadow-elevated); }
+.task-card .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
+.badge {
+  font-size: 11px; padding: 3px 8px; border-radius: var(--radius-sm); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;
+}
+.badge.paid { background: var(--color-warning-bg); color: var(--color-warning); }
+.badge.free { background: var(--color-success-bg); color: var(--color-success); }
+.badge.price { font-size: 17px; font-weight: 700; color: var(--color-accent); }
+.badge .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.badge.paid .dot { background: var(--color-warning); }
+.badge.free .dot { background: var(--color-success); }
+.card-title { font-size: 17px; font-weight: 600; color: var(--color-text); margin-bottom: 6px; line-height: 1.4; }
+.card-desc { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.5; }
+.card-meta { display: flex; align-items: center; gap: var(--space-3); font-size: 12px; color: var(--color-text-tertiary); }
+.card-meta .category { color: var(--color-primary); background: var(--color-primary-bg); padding: 3px 8px; border-radius: var(--radius-sm); font-size: 11px; font-weight: 500; }
+.meta-item { display: flex; align-items: center; gap: 3px; }
+
+/* Status tags */
+.status-tag {
+  font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;
+}
+.status-tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+.status-tag.in-progress { background: var(--color-success-bg); color: var(--color-success); }
+.status-tag.in-progress .dot { background: var(--color-success); }
+.status-tag.open { background: var(--color-info-bg); color: var(--color-info); }
+.status-tag.open .dot { background: var(--color-info); }
+.status-tag.completed { background: #F1F5F9; color: var(--color-text-secondary); }
+.status-tag.completed .dot { background: var(--color-text-secondary); }
+.status-tag.cancelled { background: var(--color-danger-bg); color: var(--color-danger); }
+.status-tag.cancelled .dot { background: var(--color-danger); }
+
+/* Detail page */
+.detail-card {
+  background: var(--color-card); border-radius: var(--radius-lg); padding: var(--space-5); margin-bottom: var(--space-3);
+  box-shadow: var(--shadow-card); border: 1px solid var(--color-border-light);
+}
+.detail-title { font-size: 20px; font-weight: 700; color: var(--color-text); margin-bottom: var(--space-2); line-height: 1.3; }
+.detail-tags { display: flex; gap: var(--space-2); align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.detail-body { font-size: 15px; color: #334155; line-height: 1.7; margin-bottom: 14px; }
+.detail-images { display: flex; gap: var(--space-2); margin-bottom: 14px; }
+.detail-img {
+  width: 100px; height: 100px; border-radius: var(--radius-md); background: #F1F5F9;
+  display: flex; align-items: center; justify-content: center; color: var(--color-text-tertiary); font-size: 28px;
+  border: 1px solid var(--color-border-light);
+}
+.detail-location { font-size: 14px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 4px; }
+
+/* User card */
+.user-card {
+  background: var(--color-card); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-3);
+  box-shadow: var(--shadow-card); display: flex; align-items: center; gap: var(--space-3);
+  border: 1px solid var(--color-border-light);
+}
+.avatar {
+  width: var(--touch-target); height: var(--touch-target); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 17px; font-weight: 600; flex-shrink: 0;
+}
+.avatar.primary { background: var(--color-primary); }
+.avatar.accent { background: var(--color-accent); }
+.avatar.sm { width: 36px; height: 36px; font-size: 14px; }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 16px; font-weight: 600; color: var(--color-text); }
+.user-sub { font-size: 13px; color: var(--color-text-tertiary); margin-top: 2px; }
+
+/* Info banner */
+.info-banner {
+  background: var(--color-primary-bg); border-radius: var(--radius-md); padding: 14px var(--space-4);
+  display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--color-primary); margin-bottom: var(--space-3);
+  border: 1px solid var(--color-primary-border);
+}
+
+/* Buttons */
+.btn {
+  width: 100%; padding: 14px; border-radius: var(--radius-md); font-size: 16px; font-weight: 600;
+  border: none; cursor: pointer; min-height: var(--touch-target); transition: all 0.15s ease;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary { background: var(--color-primary); color: #fff; box-shadow: 0 1px 2px rgba(5,150,105,0.2); }
+.btn-primary:active { background: #047857; transform: scale(0.98); }
+.btn-primary:disabled { background: #A7F3D0; color: #6EE7B7; cursor: not-allowed; box-shadow: none; }
+.btn-danger { background: var(--color-card); color: var(--color-danger); border: 1px solid #FCA5A5; margin-top: var(--space-2); }
+.btn-danger:active { background: var(--color-danger-bg); }
+.btn-outline { background: var(--color-card); color: var(--color-primary); border: 1px solid var(--color-primary); }
+.btn-outline:active { background: var(--color-primary-bg); }
+.btn-accent { background: var(--color-accent); color: #fff; box-shadow: 0 1px 2px rgba(234,88,12,0.2); }
+.btn-accent:active { background: #C2410C; transform: scale(0.98); }
+.btn-loading { opacity: 0.7; pointer-events: none; }
+.detail-footer { margin-top: var(--space-3); }
+
+/* Form */
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: 15px; font-weight: 600; color: #334155; margin-bottom: var(--space-2); display: block; }
+.form-label .optional { color: var(--color-text-tertiary); font-weight: 400; font-size: 13px; }
+.form-input {
+  width: 100%; padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-card);
+  font-size: 15px; color: var(--color-text); outline: none; transition: border 0.15s ease, box-shadow 0.15s ease;
+  min-height: var(--touch-target);
+}
+.form-input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
+.form-input::placeholder { color: #C7C8CD; }
+.form-textarea {
+  width: 100%; padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--color-border); background: var(--color-card);
+  font-size: 15px; color: var(--color-text); min-height: 120px; resize: vertical; outline: none; font-family: inherit; line-height: 1.6;
+  transition: border 0.15s ease, box-shadow 0.15s ease;
+}
+.form-textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
+.char-count { text-align: right; font-size: 12px; color: var(--color-text-tertiary); margin-top: 4px; }
+.helper-text { font-size: 12px; color: var(--color-text-tertiary); margin-top: 4px; }
+.error-text { font-size: 12px; color: var(--color-danger); margin-top: 4px; }
+
+/* Radio */
+.radio-group { display: flex; gap: var(--space-4); }
+.radio-item { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #334155; cursor: pointer; min-height: var(--touch-target); padding: 4px 0; }
+.radio-dot {
+  width: 20px; height: 20px; border-radius: 50%; border: 2px solid #D1D5DB; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: border-color 0.15s ease;
+}
+.radio-dot.checked { border-color: var(--color-primary); }
+.radio-dot.checked::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--color-primary); }
+
+/* Image upload */
+.image-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.image-add {
+  width: 80px; height: 80px; border-radius: var(--radius-md); border: 1.5px dashed #D1D5DB; background: #F8FAFC;
+  display: flex; align-items: center; justify-content: center; font-size: 28px; color: #C7C8CD; cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+.image-add:active { border-color: var(--color-primary); background: var(--color-primary-bg); }
+
+/* Profile */
+.profile-header { text-align: center; padding: var(--space-5) 0 var(--space-4); }
+.profile-header .avatar { width: 64px; height: 64px; font-size: 22px; margin: 0 auto 10px; }
+.profile-name { font-size: 18px; font-weight: 600; color: var(--color-text); }
+.profile-sub { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+
+/* Stats */
+.stats-row { display: flex; margin-bottom: var(--space-5); }
+.stat-item { flex: 1; text-align: center; }
+.stat-num { font-size: 24px; font-weight: 700; color: var(--color-text); }
+.stat-label { font-size: 12px; color: var(--color-text-tertiary); margin-top: 2px; }
+
+/* Menu */
+.menu-item {
+  display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border-light); font-size: 15px; color: #334155; cursor: pointer;
+  min-height: var(--touch-target);
+}
+.menu-item .arrow { color: #CBD5E1; font-size: 13px; }
+.logout-btn {
+  text-align: center; padding: 14px; color: var(--color-danger); font-size: 15px; cursor: pointer; margin-top: var(--space-3);
+  min-height: var(--touch-target); display: flex; align-items: center; justify-content: center;
+}
+
+/* Login */
+.login-body { text-align: center; padding: 60px var(--space-8); }
+.login-icon {
+  width: 72px; height: 72px; border-radius: var(--radius-xl); background: var(--color-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto var(--space-4);
+  box-shadow: 0 4px 16px rgba(5,150,105,0.25);
+}
+.login-title { font-size: 26px; font-weight: 700; color: var(--color-text); margin-bottom: 6px; }
+.login-slogan { font-size: 14px; color: var(--color-text-tertiary); margin-bottom: 48px; }
+.wechat-btn {
+  width: 100%; padding: 14px; border-radius: var(--radius-md); background: #07C160; color: #fff;
+  font-size: 17px; font-weight: 600; border: none; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; gap: 8px; min-height: var(--touch-target);
+  box-shadow: 0 2px 8px rgba(7,193,96,0.3); transition: all 0.15s ease;
+}
+.wechat-btn:active { background: #06AD56; transform: scale(0.98); }
+.agreement { font-size: 12px; color: var(--color-text-tertiary); margin-top: var(--space-4); }
+.feature-list {
+  background: var(--color-card); border-radius: var(--radius-lg); padding: var(--space-5); margin-top: var(--space-8);
+  text-align: left; border: 1px solid var(--color-border-light);
+}
+.feature-item { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--color-text-secondary); padding: 8px 0; }
+.feature-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-primary); flex-shrink: 0; }
+
+/* Sub tabs */
+.sub-tabs { display: flex; gap: 4px; margin-bottom: 14px; }
+.sub-tab {
+  padding: 7px 14px; border-radius: 20px; font-size: 13px; cursor: pointer;
+  background: #F1F5F9; color: var(--color-text-secondary); transition: all 0.15s ease;
+  min-height: 34px; display: flex; align-items: center;
+}
+.sub-tab.active { background: var(--color-primary); color: #fff; }
+
+/* Loading skeleton */
+.skeleton { background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 48px var(--space-4); }
+.empty-icon { font-size: 48px; color: var(--color-text-tertiary); margin-bottom: var(--space-4); opacity: 0.5; }
+.empty-text { font-size: 15px; color: var(--color-text-tertiary); margin-bottom: var(--space-4); }
+</style>
+</head>
+<body>
+
+<!-- ===== 首页 - 任务列表 ===== -->
+<div class="page-group">
+  <div class="page-label">首页 — 任务列表</div>
+  <div class="phone-frame">
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="icons">5G&nbsp;&nbsp;&#x258C;&#x258C;&#x258C;&#x258C;&nbsp;&nbsp;&#x25CB;</span>
+    </div>
+    <div class="nav-bar">互帮互助</div>
+    <div class="content">
+      <div class="search-bar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        搜索求助...
+      </div>
+
+      <div class="type-tabs">
+        <div class="type-tab active">全部</div>
+        <div class="type-tab">求助</div>
+        <div class="type-tab">技能</div>
+        <div class="type-tab">社区</div>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-chip">分类 <span style="font-size:8px;">&#x25BC;</span></div>
+        <div class="filter-chip">免费/付费 <span style="font-size:8px;">&#x25BC;</span></div>
+        <div class="filter-chip">最新 <span style="font-size:8px;">&#x25BC;</span></div>
+      </div>
+
+      <!-- Card 1 - Paid -->
+      <div class="task-card">
+        <div class="card-header">
+          <span class="badge paid"><span class="dot"></span>付费悬赏</span>
+          <span class="badge price">&yen;50.00</span>
+        </div>
+        <div class="card-title">帮忙修一下空调</div>
+        <div class="card-desc">客厅空调不制冷，去年刚加过氟，现在开机后室外机不转</div>
+        <div class="card-meta">
+          <span class="category">家电维修</span>
+          <span class="meta-item">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            小王
+          </span>
+          <span class="meta-item">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            2小时前
+          </span>
+          <span class="meta-item">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            朝阳区
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 2 - Free -->
+      <div class="task-card">
+        <div class="card-header">
+          <span class="badge free"><span class="dot"></span>免费互助</span>
+        </div>
+        <div class="card-title">找人一起打羽毛球</div>
+        <div class="card-desc">周末下午奥森公园，缺一个人，业余水平就行</div>
+        <div class="card-meta">
+          <span class="category">运动搭子</span>
+          <span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 小李</span>
+          <span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 5小时前</span>
+          <span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> 海淀区</span>
+        </div>
+      </div>
+
+      <!-- Card 3 - Free -->
+      <div class="task-card">
+        <div class="card-header">
+          <span class="badge free"><span class="dot"></span>免费互助</span>
+        </div>
+        <div class="card-title">帮忙取个快递</div>
+        <div class="card-desc">出差在外，有个快递在菜鸟驿站，求帮忙取一下</div>
+        <div class="card-meta">
+          <span class="category">日常求助</span>
+          <span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 小张</span>
+          <span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 8小时前</span>
+          <span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> 丰台区</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="tab-item active">
+        <svg class="tab-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        首页
+      </div>
+      <div class="tab-item add-btn"><div class="add-circle">+</div></div>
+      <div class="tab-item">
+        <svg class="tab-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        我的
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 详情页 - 已接单 ===== -->
+<div class="page-group">
+  <div class="page-label">求助详情 — 已接单（我是接单者）</div>
+  <div class="phone-frame">
+    <div class="status-bar"><span>9:41</span><span class="icons">5G&nbsp;&nbsp;&#x258C;&#x258C;&#x258C;&#x258C;&nbsp;&nbsp;&#x25CB;</span></div>
+    <div class="nav-bar"><span class="back">&#x2190; 返回</span>求助详情</div>
+    <div class="content">
+      <div class="detail-card">
+        <div class="detail-title">帮忙修一下空调</div>
+        <div class="detail-tags">
+          <span class="badge paid"><span class="dot"></span>付费悬赏</span>
+          <span class="badge price">&yen;50.00</span>
+          <span class="status-tag in-progress"><span class="dot"></span>进行中</span>
+        </div>
+        <div class="detail-body">客厅空调不制冷，去年刚加过氟，现在开机后室外机不转，急需有经验的师傅帮忙看一下。家里白天都有人。</div>
+        <div class="detail-images">
+          <div class="detail-img">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div class="detail-img">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+        </div>
+        <div class="detail-location">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          北京市朝阳区望京 SOHO
+        </div>
+      </div>
+
+      <div class="user-card">
+        <div class="avatar primary">王</div>
+        <div class="user-info"><div class="user-name">小王</div><div class="user-sub">发布了 5 个求助</div></div>
+      </div>
+
+      <div class="user-card">
+        <div class="avatar accent" style="background:#EA580C;">张</div>
+        <div class="user-info"><div class="user-name">老张</div><div class="user-sub">接单于 2小时前</div></div>
+        <span class="status-tag in-progress"><span class="dot"></span>进行中</span>
+      </div>
+
+      <div class="info-banner">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>请双方线下联系完成互助<br>平台暂不提供在线沟通功能</span>
+      </div>
+
+      <div class="detail-footer">
+        <button class="btn btn-primary">标记完成</button>
+        <button class="btn btn-danger">取消接单</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 详情页 - 我是发布者 ===== -->
+<div class="page-group">
+  <div class="page-label">求助详情 — 我是发布者（待接单）</div>
+  <div class="phone-frame">
+    <div class="status-bar"><span>9:41</span><span class="icons">5G&nbsp;&nbsp;&#x258C;&#x258C;&#x258C;&#x258C;&nbsp;&nbsp;&#x25CB;</span></div>
+    <div class="nav-bar"><span class="back">&#x2190; 返回</span>求助详情</div>
+    <div class="content">
+      <div class="detail-card">
+        <div class="detail-title">帮忙修一下空调</div>
+        <div class="detail-tags">
+          <span class="badge paid"><span class="dot"></span>付费悬赏</span>
+          <span class="badge price">&yen;50.00</span>
+          <span class="status-tag open"><span class="dot"></span>待接单</span>
+        </div>
+        <div class="detail-body">客厅空调不制冷，去年刚加过氟，现在开机后室外机不转。</div>
+        <div class="detail-location"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> 北京市朝阳区望京 SOHO</div>
+      </div>
+      <div class="user-card">
+        <div class="avatar primary">王</div>
+        <div class="user-info"><div class="user-name">小王</div><div class="user-sub">发布了 5 个求助</div></div>
+      </div>
+      <div class="detail-footer">
+        <button class="btn btn-outline">编辑任务</button>
+        <button class="btn btn-danger">取消任务</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 详情页 - 访客 ===== -->
+<div class="page-group">
+  <div class="page-label">求助详情 — 访客（OPEN，可接单）</div>
+  <div class="phone-frame">
+    <div class="status-bar"><span>9:41</span><span class="icons">5G&nbsp;&nbsp;&#x258C;&#x258C;&#x258C;&#x258C;&nbsp;&nbsp;&#x25CB;</span></div>
+    <div class="nav-bar"><span class="back">&#x2190; 返回</span>求助详情</div>
+    <div class="content">
+      <div class="detail-card">
+        <div class="detail-title">帮忙修一下空调</div>
+        <div class="detail-tags">
+          <span class="badge paid"><span class="dot"></span>付费悬赏</span>
+          <span class="badge price">&yen;50.00</span>
+          <span class="status-tag open"><span class="dot"></span>待接单</span>
+        </div>
+        <div class="detail-body">客厅空调不制冷，去年刚加过氟，现在开机后室外机不转。</div>
+        <div class="detail-location"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> 北京市朝阳区望京 SOHO</div>
+      </div>
+      <div class="user-card">
+        <div class="avatar primary">王</div>
+        <div class="user-info"><div class="user-name">小王</div><div class="user-sub">发布了 5 个求助</div></div>
+      </div>
+      <div class="info-banner">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>请双方线下联系完成互助</span>
+      </div>
+      <div class="detail-footer">
+        <button class="btn btn-accent">我要接单</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 发布页 ===== -->
+<div class="page-group">
+  <div class="page-label">发布求助</div>
+  <div class="phone-frame">
+    <div class="status-bar"><span>9:41</span><span class="icons">5G&nbsp;&nbsp;&#x258C;&#x258C;&#x258C;&#x258C;&nbsp;&nbsp;&#x25CB;</span></div>
+    <div class="nav-bar"><span class="back">取消</span>发布求助<span class="action">发布</span></div>
+    <div class="content">
+      <div class="form-group">
+        <label class="form-label">标题</label>
+        <input class="form-input" placeholder="简要描述你遇到的问题（1-50字）" value="帮忙修一下空调">
+        <div class="helper-text">标题会展示在列表卡片中，请简明扼要</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">任务类型</label>
+        <div class="radio-group">
+          <label class="radio-item"><span class="radio-dot checked"></span>求助</label>
+          <label class="radio-item"><span class="radio-dot"></span>技能</label>
+          <label class="radio-item"><span class="radio-dot"></span>社区</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">分类</label>
+        <input class="form-input" style="color:var(--color-text);" value="家电维修">
+        <div class="helper-text">选择合适的分类，更容易被看到</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">详细描述</label>
+        <textarea class="form-textarea" placeholder="描述具体情况、时间、地点...">客厅空调不制冷，去年刚加过氟，现在开机后室外机不转，急需有经验的师傅帮忙看一下。</textarea>
+        <div class="char-count">26/2000</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">报酬方式</label>
+        <div class="radio-group">
+          <label class="radio-item"><span class="radio-dot"></span>免费互助</label>
+          <label class="radio-item"><span class="radio-dot checked"></span>付费悬赏</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">悬赏金额</label>
+        <input class="form-input" style="color:var(--color-text);font-weight:600;" value="&yen; 50.00">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">图片 <span class="optional">（选填）</span></label>
+        <div class="image-grid">
+          <div class="image-add">+</div>
+          <div class="detail-img" style="width:80px;height:80px;margin:0;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+        </div>
+        <div class="helper-text">最多 9 张</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">地址 <span class="optional">（选填）</span></label>
+        <input class="form-input" style="color:var(--color-text);" value="北京市朝阳区望京 SOHO">
+      </div>
+
+      <button class="btn btn-primary" style="margin-top:8px;">确认发布</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 个人中心 ===== -->
+<div class="page-group">
+  <div class="page-label">我的 — 个人中心</div>
+  <div class="phone-frame">
+    <div class="status-bar"><span>9:41</span><span class="icons">5G&nbsp;&nbsp;&#x258C;&#x258C;&#x258C;&#x258C;&nbsp;&nbsp;&#x25CB;</span></div>
+    <div class="nav-bar">我的</div>
+    <div class="content">
+      <div class="profile-header">
+        <div class="avatar primary">王</div>
+        <div class="profile-name">小王</div>
+        <div class="profile-sub">积分 100</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">发布</div></div>
+        <div class="stat-item"><div class="stat-num">12</div><div class="stat-label">接单</div></div>
+        <div class="stat-item"><div class="stat-num">100</div><div class="stat-label">积分</div></div>
+      </div>
+      <div class="menu-item">我发布的<span class="arrow">&#x203A;</span></div>
+      <div class="menu-item">我接的单<span class="arrow">&#x203A;</span></div>
+      <div class="menu-item">关于平台<span class="arrow">&#x203A;</span></div>
+      <div class="menu-item">意见反馈<span class="arrow">&#x203A;</span></div>
+      <div class="logout-btn">退出登录</div>
+    </div>
+    <div class="bottom-bar">
+      <div class="tab-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        首页
+      </div>
+      <div class="tab-item"></div>
+      <div class="tab-item active">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        我的
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 登录页 ===== -->
+<div class="page-group">
+  <div class="page-label">登录页</div>
+  <div class="phone-frame">
+    <div class="status-bar"><span>9:41</span><span class="icons">5G&nbsp;&nbsp;&#x258C;&#x258C;&#x258C;&#x258C;&nbsp;&nbsp;&#x25CB;</span></div>
+    <div class="content login-body">
+      <div class="login-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      </div>
+      <div class="login-title">互帮互助</div>
+      <div class="login-slogan">免费互助 &middot; 邻里帮忙</div>
+      <button class="wechat-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm3.69 2.356c2.784 0 5.04 2.42 5.04 5.406 0 1.475-.555 2.822-1.467 3.83a.535.535 0 00-.123.443l.23 1.03c.045.19.122.247-.013.322-.134.074-.297.04-.381-.032l-1.442-1.172a.86.86 0 00-.516-.189 4.7 4.7 0 01-1.328.186c-2.784 0-5.04-2.42-5.04-5.407 0-2.986 2.256-5.406 5.04-5.406zm-1.68 3.18c-.432 0-.78.367-.78.817 0 .449.348.816.78.816.433 0 .78-.367.78-.816a.799.799 0 00-.78-.817zm3.36 0c-.433 0-.78.367-.78.817 0 .449.348.816.78.816.433 0 .78-.367.78-.816a.799.799 0 00-.78-.817z"/></svg>
+        微信一键登录
+      </button>
+      <div class="agreement">登录即同意《用户协议》</div>
+      <div class="feature-list">
+        <div class="feature-item"><span class="feature-dot"></span>发布求助 / 悬赏任务</div>
+        <div class="feature-item"><span class="feature-dot"></span>接单帮助他人</div>
+        <div class="feature-item"><span class="feature-dot"></span>查看自己的求助记录</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 我发布的 ===== -->
+<div class="page-group">
+  <div class="page-label">我发布的（子页面）</div>
+  <div class="phone-frame">
+    <div class="status-bar"><span>9:41</span><span class="icons">5G&nbsp;&nbsp;&#x258C;&#x258C;&#x258C;&#x258C;&nbsp;&nbsp;&#x25CB;</span></div>
+    <div class="nav-bar"><span class="back">&#x2190; 返回</span>我发布的</div>
+    <div class="content">
+      <div class="sub-tabs">
+        <div class="sub-tab active">全部</div>
+        <div class="sub-tab">进行中</div>
+        <div class="sub-tab">已完成</div>
+        <div class="sub-tab">已取消</div>
+      </div>
+      <div class="task-card">
+        <div class="card-header">
+          <span class="badge paid"><span class="dot"></span>付费悬赏</span>
+          <span class="badge price">&yen;50.00</span>
+        </div>
+        <div class="card-title">帮忙修一下空调</div>
+        <div class="card-desc">客厅空调不制冷，去年刚加过氟</div>
+        <div class="card-meta">
+          <span class="category">家电维修</span>
+          <span class="status-tag in-progress"><span class="dot"></span>进行中</span>
+          <span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 2小时前</span>
+        </div>
+      </div>
+      <div class="task-card">
+        <div class="card-header">
+          <span class="badge free"><span class="dot"></span>免费互助</span>
+        </div>
+        <div class="card-title">帮忙取个快递</div>
+        <div class="card-desc">出差在外，有个快递在菜鸟驿站</div>
+        <div class="card-meta">
+          <span class="category">日常求助</span>
+          <span class="status-tag completed"><span class="dot"></span>已完成</span>
+          <span class="meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 3天前</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

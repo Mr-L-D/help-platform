@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum TaskType {
+  HELP
+  SKILL
+  COMMUNITY
+}
+
+enum RewardType {
+  FREE
+  PAID
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderStatus {
+  ACCEPTED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  openid    String   @unique
+  nickname  String
+  avatar    String
+  phone     String?
+  role      UserRole @default(USER)
+  points    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  publishedTasks Task[] @relation("Publisher")
+  orders         Order[]
+
+  @@map("users")
+}
+
+model Category {
+  id   String   @id @default(uuid())
+  name String
+  icon String
+  type TaskType
+
+  tasks Task[]
+
+  @@map("categories")
+}
+
+model Task {
+  id           String     @id @default(uuid())
+  publisherId  String     @map("publisher_id")
+  title        String
+  description  String     @db.Text
+  type         TaskType
+  categoryId   String     @map("category_id")
+  rewardType   RewardType @map("reward_type")
+  rewardAmount Decimal?   @map("reward_amount") @db.Decimal(10, 2)
+  images       Json       @default("[]")
+  location     String?
+  status       TaskStatus @default(OPEN)
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  publisher User       @relation("Publisher", fields: [publisherId], references: [id])
+  category  Category   @relation(fields: [categoryId], references: [id])
+  orders    Order[]
+
+  @@map("tasks")
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  taskId    String      @map("task_id")
+  helperId  String      @map("helper_id")
+  status    OrderStatus @default(ACCEPTED)
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  task   Task @relation(fields: [taskId], references: [id])
+  helper User @relation(fields: [helperId], references: [id])
+
+  @@map("orders")
+}

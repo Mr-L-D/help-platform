@@ -1,0 +1,28 @@
+# deps
+node_modules/
+
+# build
+dist/
+.next/
+.output/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# turbo
+.turbo/
+
+# logs
+*.log
