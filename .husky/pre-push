@@ -1,0 +1,15 @@
+#!/bin/sh
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$branch" = "master" ]; then
+  echo ""
+  echo "============================================="
+  echo "  ERROR: master 分支受保护，禁止直接 push"
+  echo "  请创建 feature 分支并通过 PR 合并"
+  echo ""
+  echo "  git checkout -b feat/your-feature"
+  echo "============================================="
+  echo ""
+  exit 1
+fi

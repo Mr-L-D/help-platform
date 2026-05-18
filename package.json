@@ -11,9 +11,12 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,vue,js,jsx,json,css,md}\"",
     "db:push": "pnpm --filter @help-platform/database db:push",
     "db:generate": "pnpm --filter @help-platform/database db:generate",
-    "db:studio": "pnpm --filter @help-platform/database db:studio"
+    "db:studio": "pnpm --filter @help-platform/database db:studio",
+    "prepare": "husky"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
     "@eslint/js": "9.39.4",
     "@types/node": "22.19.19",
     "eslint": "9.39.4",
@@ -21,6 +24,8 @@
     "eslint-import-resolver-typescript": "4.4.4",
     "eslint-plugin-import": "2.32.0",
     "globals": "15.15.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
     "prettier": "3.8.3",
     "turbo": "2.9.12",
     "typescript": "5.9.3",
@@ -29,5 +34,14 @@
   "packageManager": "pnpm@10.30.2",
   "engines": {
     "node": ">=20"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix --no-warn-ignored",
+      "prettier --write"
+    ],
+    "*.{json,css,md,vue}": [
+      "prettier --write"
+    ]
   }
 }
