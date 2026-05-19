@@ -1,33 +1,28 @@
-/** 任务类型 */
-export enum TaskType {
+export enum TASK_TYPE {
   HELP = 'HELP',
   SKILL = 'SKILL',
   COMMUNITY = 'COMMUNITY',
 }
 
-/** 悬赏类型 */
-export enum RewardType {
+export enum REWARD_TYPE {
   FREE = 'FREE',
   PAID = 'PAID',
 }
 
-/** 任务状态 */
-export enum TaskStatus {
+export enum TASK_STATUS {
   OPEN = 'OPEN',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }
 
-/** 接单状态 */
-export enum OrderStatus {
+export enum ORDER_STATUS {
   ACCEPTED = 'ACCEPTED',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }
 
-/** 用户角色 */
-export enum UserRole {
+export enum USER_ROLE {
   USER = 'USER',
   ADMIN = 'ADMIN',
 }

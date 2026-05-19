@@ -8,7 +8,7 @@
 
 综合性互助平台，用户可以免费互助，也可发布付费悬赏。MVP 包含核心流程。
 
-- **平台**：微信小程序（uni-app）+ Next.js 16 管理后台
+- **平台**：uni-app 构建微信小程序 + H5（移动端网页），Next.js 16 管理后台
 - **后端**：Next.js 全栈（API 路由 + 管理后台页面）
 - **数据库**：PostgreSQL + Prisma ORM
 - **支付**：MVP 阶段仅展示金额，线下自行结算
@@ -22,16 +22,16 @@
 
 ## 3. 技术栈
 
-| 层         | 技术                     | 用途                   |
-| ---------- | ------------------------ | ---------------------- |
-| 小程序框架 | uni-app (Vue 3)          | 跨端编译微信小程序     |
-| 小程序状态 | Pinia                    | 用户登录态、全局数据   |
-| 小程序UI   | uView Plus               | uni-app 生态 UI 组件库 |
-| 后端框架   | Next.js 16 App Router    | API + 管理后台         |
-| ORM        | Prisma                   | 数据库操作、类型生成   |
-| 数据库     | PostgreSQL               | 数据存储               |
-| 管理后台UI | shadcn/ui + Tailwind CSS | 后台界面               |
-| 认证       | JWT + 微信登录           | 小程序和后台两套认证   |
+| 层         | 技术                        | 用途                       |
+| ---------- | --------------------------- | -------------------------- |
+| 前端框架   | uni-app (Vue 3)             | 编译微信小程序 + H5 移动端 |
+| 前端状态   | Pinia                       | 用户登录态、全局数据       |
+| 前端UI     | uView Plus                  | uni-app 生态 UI 组件库     |
+| 后端框架   | Next.js 16 App Router       | API + 管理后台             |
+| ORM        | Prisma                      | 数据库操作、类型生成       |
+| 数据库     | PostgreSQL                  | 数据存储                   |
+| 管理后台UI | shadcn/ui + Tailwind CSS    | 后台界面                   |
+| 认证       | JWT + 微信登录 + 用户名密码 | 小程序、H5、后台三端认证   |
 
 ## 4. 项目结构
 
@@ -48,7 +48,7 @@
 ```
 /help-platform/
 ├── apps/
-│   ├── miniapp/                 # uni-app 小程序 (Vue 3)
+│   ├── miniapp/                 # uni-app (Vue 3) → 微信小程序 + H5
 │   │   ├── src/
 │   │   │   ├── pages/           # 页面
 │   │   │   │   ├── index/       # 首页（求助列表）
@@ -57,9 +57,9 @@
 │   │   │   │   ├── mine/        # 我的（个人中心）
 │   │   │   │   └── login/       # 登录页
 │   │   │   ├── components/      # 公共组件
-│   │   │   ├── api/             # 接口请求封装
+│   │   │   ├── api/             # 接口请求封装（uni.request 统一拦截）
 │   │   │   ├── store/           # 状态管理 (pinia)
-│   │   │   └── utils/           # 工具函数
+│   │   │   └── utils/           # 工具函数（含平台差异化逻辑）
 │   │   ├── manifest.json
 │   │   ├── pages.json
 │   │   ├── eslint.config.mjs       # extends 根 ESLint + vue 插件
@@ -110,7 +110,7 @@
 └── tsconfig.json                # 根级 TS 配置（各包 extends）
 ```
 
-**依赖关系**：`apps/*` → `packages/shared`（类型引用）、`apps/admin` → `packages/database`（ORM 访问），小程序不直接依赖 database 包。
+**依赖关系**：`apps/*` → `packages/shared`（类型引用）、`apps/admin` → `packages/database`（ORM 访问），前端不直接依赖 database 包。
 
 **关键命令**：
 
@@ -131,20 +131,38 @@
 
 根级 ESLint 提取两个 app 的共性规则（TypeScript 严格模式、命名规范等），避免重复；框架专属规则由各 app 自行追加。根 `turbo.json` 中配置 `lint` 和 `format` 任务，一次性检查所有包。
 
+**多端适配（uni-app 条件编译）**：
+
+uni-app 构建时通过条件编译语法 `#ifdef` / `#ifndef` 处理平台差异，关键差异点：
+
+| 模块     | 微信小程序                              | H5                                      |
+| -------- | --------------------------------------- | --------------------------------------- |
+| 登录     | `wx.login()` → `/api/auth/wechat-login` | 用户名密码 → `/api/auth/password-login` |
+| 存储     | `uni.setStorageSync`                    | `uni.setStorageSync`（统一 API）        |
+| 网络请求 | `uni.request`                           | `uni.request`（统一 API）               |
+| UI 适配  | `rpx` 响应式单位（375px 基准）          | `rpx` → rem 转换（自动）                |
+
+大部分代码可复用，登录页面和认证逻辑需按平台区分（小程序微信一键登录，H5 用户名密码表单）。
+
 ## 5. 数据库模型
 
 ### User（用户表）
 
-| 字段       | 类型              | 说明        |
-| ---------- | ----------------- | ----------- |
-| id         | UUID              | 主键        |
-| openid     | String (unique)   | 微信 openid |
-| nickname   | String            | 微信昵称    |
-| avatar     | String            | 头像 URL    |
-| phone      | String?           | 手机号      |
-| role       | Enum(USER, ADMIN) | 角色        |
-| points     | Int (default 0)   | 积分        |
-| created_at | DateTime          | 注册时间    |
+| 字段          | 类型              | 说明                             |
+| ------------- | ----------------- | -------------------------------- |
+| id            | UUID              | 主键                             |
+| openid        | String (unique)?  | 微信小程序 openid（H5 用户为空） |
+| unionid       | String?           | 微信 UnionID（跨平台账号绑定）   |
+| nickname      | String            | 昵称                             |
+| avatar        | String            | 头像 URL                         |
+| username      | String?           | 用户名（H5 登录标识）            |
+| password_hash | String?           | 密码哈希（H5 用户）              |
+| phone         | String?           | 手机号（后期绑定）               |
+| role          | Enum(USER, ADMIN) | 角色                             |
+| points        | Int (default 0)   | 积分                             |
+| created_at    | DateTime          | 注册时间                         |
+
+> **多端登录策略**：小程序端通过 `wx.login` 获取 code 换取 openid 自动登录；H5 端通过用户名密码注册/登录。若用户先后使用小程序和 H5，后续可通过绑定微信 UnionID 关联同一账号。手机号留作后期付费业务绑定使用。
 
 ### Task（求助任务表）
 
@@ -189,7 +207,7 @@
 ## 6. API 接口设计
 
 > 所有接口前缀 `/api`，返回统一 JSON 格式 `{ code, data, message }`。
-> 小程序端认证通过 `Authorization: Bearer <token>` 请求头传递 JWT。
+> 客户端认证通过 `Authorization: Bearer <token>` 请求头传递 JWT。
 
 ### 6.1 统一响应格式
 
@@ -213,6 +231,8 @@
 ---
 
 ### 6.2 认证相关 `/api/auth`
+
+> 小程序端通过 `wx.login` code 换取 openid；H5 端通过用户名密码注册/登录；管理后台通过用户名密码登录。
 
 #### POST `/api/auth/wechat-login`
 
@@ -244,6 +264,56 @@ Response:
 ```
 
 逻辑：用 code 换取 openid，新用户自动注册，返回 JWT。
+
+---
+
+#### POST `/api/auth/register`
+
+H5 端用户名密码注册。
+
+Request:
+
+```json
+{
+  "username": "zhangsan",
+  "password": "123456"
+}
+```
+
+Response:
+
+```json
+{
+  "code": 0,
+  "data": {
+    "token": "jwt-token",
+    "user": {
+      "id": "uuid",
+      "nickname": "zhangsan",
+      "role": "USER"
+    }
+  }
+}
+```
+
+校验：`username` 4-20 位字母数字，不可重复；`password` 6-32 位。注册成功自动登录，返回 JWT。
+
+---
+
+#### POST `/api/auth/password-login`
+
+H5 端用户名密码登录。
+
+Request:
+
+```json
+{
+  "username": "zhangsan",
+  "password": "123456"
+}
+```
+
+Response: 同 register，校验用户名密码，成功返回 JWT。
 
 ---
 
@@ -596,16 +666,19 @@ Response:
 
 ### 6.8 认证与权限策略
 
-| 端点                  | 认证             |
-| --------------------- | ---------------- |
-| `/api/auth/*`         | 否（登录接口）   |
-| `/api/categories`     | 否               |
-| `/api/tasks` GET      | 否               |
-| `/api/tasks/[id]` GET | 否               |
-| `/api/tasks` POST/PUT | 是（USER 角色）  |
-| `/api/orders`         | 是（USER 角色）  |
-| `/api/users`          | 否（公开信息）   |
-| `/api/auth/me`        | 是               |
-| `/api/admin/*`        | 是（ADMIN 角色） |
+| 端点                       | 认证             |
+| -------------------------- | ---------------- |
+| `/api/auth/wechat-login`   | 否               |
+| `/api/auth/register`       | 否               |
+| `/api/auth/password-login` | 否               |
+| `/api/auth/admin/login`    | 否               |
+| `/api/auth/me`             | 是               |
+| `/api/categories`          | 否               |
+| `/api/tasks` GET           | 否               |
+| `/api/tasks/[id]` GET      | 否               |
+| `/api/tasks` POST/PUT      | 是（USER 角色）  |
+| `/api/orders`              | 是（USER 角色）  |
+| `/api/users`               | 否（公开信息）   |
+| `/api/admin/*`             | 是（ADMIN 角色） |
 
-服务端通过中间件校验 JWT：小程序用 openid 签发，管理后台用用户名密码签发，token 中包含 `role` 字段以区分权限。
+服务端通过中间件校验 JWT：小程序用 openid 签发，H5 用 username 签发，管理后台用用户名密码签发；token 中包含 `role` 字段以区分权限。所有用户（含管理员）均存储在 `users` 表中，通过 `role` 字段区分角色。

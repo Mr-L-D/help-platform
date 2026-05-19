@@ -11,31 +11,31 @@
 ```ts
 // ===== 枚举 =====
 
-export enum TaskType {
+export enum TASK_TYPE {
   HELP = 'HELP',
   SKILL = 'SKILL',
   COMMUNITY = 'COMMUNITY',
 }
 
-export enum RewardType {
+export enum REWARD_TYPE {
   FREE = 'FREE',
   PAID = 'PAID',
 }
 
-export enum TaskStatus {
+export enum TASK_STATUS {
   OPEN = 'OPEN',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }
 
-export enum OrderStatus {
+export enum ORDER_STATUS {
   ACCEPTED = 'ACCEPTED',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
 }
 
-export enum UserRole {
+export enum USER_ROLE {
   USER = 'USER',
   ADMIN = 'ADMIN',
 }
@@ -47,7 +47,7 @@ export interface User {
   nickname: string;
   avatar: string;
   phone?: string;
-  role: UserRole;
+  role: USER_ROLE;
   points: number;
   createdAt: string;
 }
@@ -65,7 +65,7 @@ export interface Category {
   id: string;
   name: string;
   icon: string;
-  type: TaskType;
+  type: TASK_TYPE;
 }
 
 export interface Task {
@@ -73,13 +73,13 @@ export interface Task {
   publisherId: string;
   title: string;
   description: string;
-  type: TaskType;
+  type: TASK_TYPE;
   category: Category;
-  rewardType: RewardType;
+  rewardType: REWARD_TYPE;
   rewardAmount: number | null;
   images: string[];
   location: string | null;
-  status: TaskStatus;
+  status: TASK_STATUS;
   publisher: UserPublic;
   createdAt: string;
 }
@@ -94,13 +94,13 @@ export interface TaskBrief {
   id: string;
   title: string;
   description: string;
-  type: TaskType;
+  type: TASK_TYPE;
   category: Category;
-  rewardType: RewardType;
+  rewardType: REWARD_TYPE;
   rewardAmount: number | null;
   images: string[];
   location: string | null;
-  status: TaskStatus;
+  status: TASK_STATUS;
   publisher: UserPublic;
   createdAt: string;
 }
@@ -109,7 +109,7 @@ export interface Order {
   id: string;
   taskId: string;
   helperId: string;
-  status: OrderStatus;
+  status: ORDER_STATUS;
   task: TaskBrief;
   helper: UserPublic;
   createdAt: string;
@@ -118,7 +118,7 @@ export interface Order {
 export interface OrderBrief {
   id: string;
   helper: UserPublic;
-  status: OrderStatus;
+  status: ORDER_STATUS;
   createdAt: string;
 }
 
@@ -139,14 +139,40 @@ export interface ApiResponse<T = unknown> {
   message: string;
 }
 
+// ===== 认证相关请求/响应 =====
+
+export interface WechatLoginRequest {
+  code: string;
+}
+
+export interface PasswordLoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  password: string;
+}
+
+export interface AdminLoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
 // ===== 请求体 =====
 
 export interface CreateTaskBody {
   title: string;
   description: string;
-  type: TaskType;
+  type: TASK_TYPE;
   categoryId: string;
-  rewardType: RewardType;
+  rewardType: REWARD_TYPE;
   rewardAmount?: number;
   images?: string[];
   location?: string;
@@ -167,10 +193,10 @@ export interface UpdateUserBody {
 export interface TaskListQuery {
   page?: number;
   pageSize?: number;
-  type?: TaskType;
+  type?: TASK_TYPE;
   categoryId?: string;
-  rewardType?: RewardType;
-  status?: TaskStatus;
+  rewardType?: REWARD_TYPE;
+  status?: TASK_STATUS;
   keyword?: string;
   sort?: 'newest' | 'reward_desc';
 }
@@ -211,7 +237,12 @@ api/
 **auth.ts**
 
 ```ts
-export function wechatLogin(code: string): Promise<{ token: string; user: User }>;
+// 小程序端
+export function wechatLogin(code: string): Promise<LoginResponse>;
+// H5 端
+export function register(username: string, password: string): Promise<LoginResponse>;
+export function passwordLogin(username: string, password: string): Promise<LoginResponse>;
+// 通用
 export function getMe(): Promise<User>;
 export function updateMe(body: UpdateUserBody): Promise<User>;
 ```
@@ -243,7 +274,7 @@ export function getMyOrders(query: {
 **categories.ts**
 
 ```ts
-export function getCategories(type?: TaskType): Promise<Category[]>;
+export function getCategories(type?: TASK_TYPE): Promise<Category[]>;
 ```
 
 **users.ts**
@@ -252,7 +283,7 @@ export function getCategories(type?: TaskType): Promise<Category[]>;
 export function getUserById(id: string): Promise<UserPublic>;
 export function getUserTasks(
   id: string,
-  query: { page?: number; pageSize?: number; status?: TaskStatus },
+  query: { page?: number; pageSize?: number; status?: TASK_STATUS },
 ): Promise<Paginated<TaskBrief>>;
 ```
 
@@ -281,10 +312,14 @@ interface UserState {
 }
 
 // Actions
-loginByWechat(); // 1. 调用 wx.login 获取 code
-// 2. 调用 wechatLogin API
-// 3. 存储 token 到 storage
-// 4. 设置 user 状态
+
+// #ifdef MP-WEIXIN
+login(); // 小程序：调用 wx.login 获取 code → wechatLogin API
+// #endif
+// #ifndef MP-WEIXIN
+login(username: string, password: string); // H5：调用 passwordLogin API
+// #endif
+// 通用：存储 token 到 storage，设置 user 状态
 
 fetchMe(); // 获取当前用户信息（用于从 storage 恢复 token 后）
 
@@ -317,9 +352,9 @@ interface TaskState {
 
   // 筛选条件（记忆用户选择）
   filter: {
-    type: TaskType | null;
+    type: TASK_TYPE | null;
     categoryId: string | null;
-    rewardType: RewardType | null;
+    rewardType: REWARD_TYPE | null;
     keyword: string;
     sort: 'newest' | 'reward_desc';
   };
@@ -363,8 +398,8 @@ interface OrderState {
   orderTotal: number;
   taskTotal: number;
 
-  orderStatus: OrderStatus | null;   // 筛选
-  taskStatus: TaskStatus | null;
+  orderStatus: ORDER_STATUS | null;   // 筛选
+  taskStatus: TASK_STATUS | null;
 
   loading: boolean;
 }
@@ -383,10 +418,12 @@ cancelOrder(orderId: string)
 
 ### 4.1 登录流程
 
+**小程序端（微信登录）**
+
 ```
 用户点击「微信一键登录」
   ↓
-loginByWechat()
+userStore.login()
   ↓
 wx.login() → code
   ↓
@@ -401,6 +438,29 @@ userStore.user = user
   ↓
 uni.switchTab → 首页
 ```
+
+**H5 端（用户名密码登录）**
+
+```
+用户输入用户名 + 密码 → 点击「登录」
+  ↓
+userStore.login(username, password)
+  ↓
+POST /api/auth/password-login { username, password }
+  ↓
+收到 { token, user }
+  ↓
+uni.setStorageSync('token', token)   ← 持久化
+  ↓
+userStore.token = token
+userStore.user = user
+  ↓
+uni.switchTab → 首页
+```
+
+新用户先调用 `POST /api/auth/register` 注册，再登录。
+
+> 手机号登录（含短信验证码）留作后期付费业务接入后再实现。
 
 ### 4.2 任务列表加载
 

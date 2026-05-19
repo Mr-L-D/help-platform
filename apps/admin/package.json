@@ -9,11 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@help-platform/database": "workspace:*",
+    "@help-platform/shared": "workspace:*",
+    "jose": "^6.2.3",
     "next": "16.2.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "@help-platform/shared": "workspace:*",
-    "@help-platform/database": "workspace:*"
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
