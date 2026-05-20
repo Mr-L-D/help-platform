@@ -72,8 +72,10 @@ help-platform/
 # 安装依赖
 pnpm install
 
-# 配置环境变量 (根目录 .env)
-cp .env.example .env
+# 配置环境变量
+# Next.js admin → apps/admin/.env.local
+# Prisma → packages/database/.env
+cp .env.example apps/admin/.env.local
 ```
 
 环境变量说明：
