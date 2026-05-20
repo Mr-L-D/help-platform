@@ -4,6 +4,7 @@ import { signToken } from '@/lib/auth';
 import { verifyPassword } from '@/lib/password';
 import { prisma } from '@/lib/prisma';
 
+/** POST /api/auth/password-login — 用户名密码登录 */
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();

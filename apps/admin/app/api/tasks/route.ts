@@ -1,4 +1,4 @@
-import type { Prisma } from '@help-platform/database';
+import type { Prisma } from '@prisma/client';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { requireUser } from '@/lib/auth-helpers';
@@ -9,6 +9,7 @@ const defaultInclude = {
   publisher: { select: { id: true, nickname: true, avatar: true } },
 } as const;
 
+/** 根据查询参数构建任务列表的 Prisma 筛选条件 */
 function buildWhere(searchParams: URLSearchParams) {
   const where: Prisma.TaskWhereInput = {};
 
@@ -30,7 +31,7 @@ function buildWhere(searchParams: URLSearchParams) {
   return where;
 }
 
-// GET /api/tasks — 任务列表
+/** GET /api/tasks — 任务列表 */
 export async function GET(request: NextRequest) {
   try {
     const params = request.nextUrl.searchParams;
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/tasks — 发布任务
+/** POST /api/tasks — 发布任务 */
 export async function POST(request: NextRequest) {
   try {
     const payload = await requireUser(request).catch(() => null);

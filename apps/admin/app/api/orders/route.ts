@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { requireUser } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 
-// POST /api/orders — 接单
+/** POST /api/orders — 接单 */
 export async function POST(request: NextRequest) {
   try {
     const payload = await requireUser(request).catch(() => null);
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/orders — 我的接单列表
+/** GET /api/orders — 我的接单列表 */
 export async function GET(request: NextRequest) {
   try {
     const payload = await requireUser(request).catch(() => null);

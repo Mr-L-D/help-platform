@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
 
+/** GET /api/categories — 获取分类列表，支持按 type 过滤 */
 export async function GET(request: NextRequest) {
   try {
     const type = request.nextUrl.searchParams.get('type');

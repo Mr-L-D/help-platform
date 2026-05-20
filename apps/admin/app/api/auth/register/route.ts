@@ -4,6 +4,7 @@ import { signToken } from '@/lib/auth';
 import { hashPassword } from '@/lib/password';
 import { prisma } from '@/lib/prisma';
 
+/** POST /api/auth/register — 用户名密码注册 */
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();

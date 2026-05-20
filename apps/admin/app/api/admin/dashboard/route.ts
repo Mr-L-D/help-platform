@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 
+/** GET /api/admin/dashboard — 管理端仪表盘统计 */
 export async function GET(request: NextRequest) {
   try {
     const payload = await requireAdmin(request).catch(() => null);

@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { signToken } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+/** POST /api/auth/admin/login — 管理员登录 */
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();

@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 
-// PUT /api/admin/users/[id] — 管理端编辑/拉黑用户
+/** PUT /api/admin/users/[id] — 管理端编辑/拉黑用户 */
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const payload = await requireAdmin(request).catch(() => null);

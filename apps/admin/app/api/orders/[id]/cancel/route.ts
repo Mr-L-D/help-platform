@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { requireUser } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 
-// POST /api/orders/[id]/cancel — 取消接单
+/** POST /api/orders/[id]/cancel — 取消接单 */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const payload = await requireUser(request).catch(() => null);

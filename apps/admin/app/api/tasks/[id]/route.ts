@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { requireUser } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
 
-// GET /api/tasks/[id] — 任务详情
+/** GET /api/tasks/[id] — 任务详情 */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-// PUT /api/tasks/[id] — 编辑任务
+/** PUT /api/tasks/[id] — 编辑任务 */
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const payload = await requireUser(request).catch(() => null);
