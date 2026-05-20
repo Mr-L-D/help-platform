@@ -7,30 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
+enum USER_ROLE {
   USER
   ADMIN
 }
 
-enum TaskType {
+enum TASK_TYPE {
   HELP
   SKILL
   COMMUNITY
 }
 
-enum RewardType {
+enum REWARD_TYPE {
   FREE
   PAID
 }
 
-enum TaskStatus {
+enum TASK_STATUS {
   OPEN
   IN_PROGRESS
   COMPLETED
   CANCELLED
 }
 
-enum OrderStatus {
+enum ORDER_STATUS {
   ACCEPTED
   COMPLETED
   CANCELLED
@@ -45,7 +45,7 @@ model User {
   username     String?
   passwordHash String?  @map("password_hash")
   phone        String?
-  role         UserRole @default(USER)
+  role         USER_ROLE @default(USER)
   points       Int      @default(0)
   createdAt    DateTime @default(now()) @map("created_at")
 
@@ -59,7 +59,7 @@ model Category {
   id   String   @id @default(uuid())
   name String
   icon String
-  type TaskType
+  type TASK_TYPE
 
   tasks Task[]
 
@@ -71,13 +71,13 @@ model Task {
   publisherId  String     @map("publisher_id")
   title        String
   description  String     @db.Text
-  type         TaskType
+  type         TASK_TYPE
   categoryId   String     @map("category_id")
-  rewardType   RewardType @map("reward_type")
+  rewardType   REWARD_TYPE @map("reward_type")
   rewardAmount Decimal?   @map("reward_amount") @db.Decimal(10, 2)
   images       Json       @default("[]")
   location     String?
-  status       TaskStatus @default(OPEN)
+  status       TASK_STATUS @default(OPEN)
   createdAt    DateTime   @default(now()) @map("created_at")
 
   publisher User       @relation("Publisher", fields: [publisherId], references: [id])
@@ -91,7 +91,7 @@ model Order {
   id        String      @id @default(uuid())
   taskId    String      @map("task_id")
   helperId  String      @map("helper_id")
-  status    OrderStatus @default(ACCEPTED)
+  status    ORDER_STATUS @default(ACCEPTED)
   createdAt DateTime    @default(now()) @map("created_at")
 
   task   Task @relation(fields: [taskId], references: [id])
