@@ -3,18 +3,25 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { signToken } from '@/lib/auth';
 import { verifyPassword } from '@/lib/password';
 import { prisma } from '@/lib/prisma';
+import { rateLimit } from '@/lib/rate-limit';
+import { passwordLoginSchema, validateBody } from '@/lib/validation';
 
 /** POST /api/auth/password-login — 用户名密码登录 */
 export async function POST(request: NextRequest) {
   try {
-    const { username, password } = await request.json();
-
-    if (!username || !password) {
+    // 速率限制：每 IP 每分钟最多 5 次
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`password-login:${clientIp}`, 5, 60_000)) {
       return NextResponse.json(
-        { code: 422, data: null, message: '用户名和密码不能为空' },
-        { status: 422 },
+        { code: 429, data: null, message: '请求过于频繁，请稍后再试' },
+        { status: 429 },
       );
     }
+
+    // zod 校验请求体
+    const parsed = await validateBody(request, passwordLoginSchema);
+    if (!parsed.success) return parsed.response;
+    const { username, password } = parsed.data;
 
     const user = await prisma.user.findFirst({ where: { username } });
     if (!user || !user.passwordHash || !verifyPassword(password, user.passwordHash)) {

@@ -3,32 +3,25 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { signToken } from '@/lib/auth';
 import { hashPassword } from '@/lib/password';
 import { prisma } from '@/lib/prisma';
+import { rateLimit } from '@/lib/rate-limit';
+import { registerSchema, validateBody } from '@/lib/validation';
 
 /** POST /api/auth/register — 用户名密码注册 */
 export async function POST(request: NextRequest) {
   try {
-    const { username, password } = await request.json();
-
-    if (!username || !password) {
+    // 速率限制：每 IP 每分钟最多 3 次
+    const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
+    if (!rateLimit(`register:${clientIp}`, 3, 60_000)) {
       return NextResponse.json(
-        { code: 422, data: null, message: '用户名和密码不能为空' },
-        { status: 422 },
+        { code: 429, data: null, message: '请求过于频繁，请稍后再试' },
+        { status: 429 },
       );
     }
 
-    if (!/^[a-zA-Z0-9]{4,20}$/.test(username)) {
-      return NextResponse.json(
-        { code: 422, data: null, message: '用户名需为4-20位字母数字' },
-        { status: 422 },
-      );
-    }
-
-    if (password.length < 6 || password.length > 32) {
-      return NextResponse.json(
-        { code: 422, data: null, message: '密码需为6-32位' },
-        { status: 422 },
-      );
-    }
+    // zod 校验请求体（含正则用户名和密码长度）
+    const parsed = await validateBody(request, registerSchema);
+    if (!parsed.success) return parsed.response;
+    const { username, password } = parsed.data;
 
     const existing = await prisma.user.findFirst({ where: { username } });
     if (existing) {

@@ -1,32 +1,26 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { requireUser } from '@/lib/auth-helpers';
+import { withUser } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/prisma';
+import { sanitizeUser } from '@/lib/user-utils';
+
+/** 中国大陆手机号正则 */
+const PHONE_RE = /^1[3-9]\d{9}$/;
 
 /** GET /api/auth/me — 获取当前用户信息 */
 export async function GET(request: NextRequest) {
   try {
-    const payload = await requireUser(request).catch(() => null);
-    if (!payload) {
-      return NextResponse.json({ code: 401, data: null, message: '请先登录' }, { status: 401 });
-    }
+    return withUser(request, async (payload) => {
+      const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+      if (!user) {
+        return NextResponse.json({ code: 404, data: null, message: '用户不存在' }, { status: 404 });
+      }
 
-    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
-    if (!user) {
-      return NextResponse.json({ code: 404, data: null, message: '用户不存在' }, { status: 404 });
-    }
-
-    return NextResponse.json({
-      code: 0,
-      data: {
-        id: user.id,
-        nickname: user.nickname,
-        avatar: user.avatar,
-        phone: user.phone,
-        role: user.role,
-        points: user.points,
-      },
-      message: 'ok',
+      return NextResponse.json({
+        code: 0,
+        data: sanitizeUser(user),
+        message: 'ok',
+      });
     });
   } catch (error) {
     console.error('me GET:', error);
@@ -37,30 +31,28 @@ export async function GET(request: NextRequest) {
 /** PUT /api/auth/me — 更新当前用户信息 */
 export async function PUT(request: NextRequest) {
   try {
-    const payload = await requireUser(request).catch(() => null);
-    if (!payload) {
-      return NextResponse.json({ code: 401, data: null, message: '请先登录' }, { status: 401 });
-    }
+    return withUser(request, async (payload) => {
+      const body = await request.json();
+      const data: Record<string, string> = {};
+      if (body.nickname) data.nickname = body.nickname;
+      if (body.avatar) data.avatar = body.avatar;
+      if (body.phone) {
+        if (!PHONE_RE.test(body.phone)) {
+          return NextResponse.json(
+            { code: 422, data: null, message: '手机号格式不正确' },
+            { status: 422 },
+          );
+        }
+        data.phone = body.phone;
+      }
 
-    const body = await request.json();
-    const data: Record<string, string> = {};
-    if (body.nickname) data.nickname = body.nickname;
-    if (body.avatar) data.avatar = body.avatar;
-    if (body.phone) data.phone = body.phone;
+      const user = await prisma.user.update({ where: { id: payload.userId }, data });
 
-    const user = await prisma.user.update({ where: { id: payload.userId }, data });
-
-    return NextResponse.json({
-      code: 0,
-      data: {
-        id: user.id,
-        nickname: user.nickname,
-        avatar: user.avatar,
-        phone: user.phone,
-        role: user.role,
-        points: user.points,
-      },
-      message: 'ok',
+      return NextResponse.json({
+        code: 0,
+        data: sanitizeUser(user),
+        message: 'ok',
+      });
     });
   } catch (error) {
     console.error('me PUT:', error);

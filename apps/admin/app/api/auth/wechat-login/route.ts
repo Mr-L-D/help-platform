@@ -30,7 +30,9 @@ export async function POST(request: NextRequest) {
       }
       openid = data.openid;
     } else {
-      openid = `dev_openid_${code.slice(-8)}`;
+      // 开发模式 mock：确保 code 至少有 8 位可截取
+      const suffix = code.length >= 8 ? code.slice(-8) : code.padStart(8, '0').slice(-8);
+      openid = `dev_openid_${suffix}`;
     }
 
     let user = await prisma.user.findUnique({ where: { openid } });
